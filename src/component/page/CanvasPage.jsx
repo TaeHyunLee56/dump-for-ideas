@@ -204,14 +204,6 @@ function CanvasPage(props) {
         }
     };
 
-    const handleCancel = () => {
-        if (!apiKey) {
-            return;
-        }
-        setIsModalOpen(false);
-        setInputApiKey(apiKey || '');
-    };
-
     return (
             <Wrapper>
                 <Header toggled={toggled} onToggle={handleToggle} canvasData={{}} canvasId={null} />

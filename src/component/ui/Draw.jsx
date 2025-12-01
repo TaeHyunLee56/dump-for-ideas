@@ -145,7 +145,7 @@ function Draw({ imageCanvasRef, drawingCanvasRef }) {
         if (initialRender) {
             setInitialRender(false);
         }
-    }, []);
+    }, [initialRender]);
 
     return (
         <div>
