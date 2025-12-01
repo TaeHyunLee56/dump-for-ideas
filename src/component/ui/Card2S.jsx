@@ -1,0 +1,146 @@
+import React, { useRef } from "react";
+import styled from "styled-components";
+import { useCardContext } from '../../context/CardContext';
+
+
+const Wrapper = styled.div`
+    box-sizing: border-box;
+    width: 275px;
+    height: 370px;
+    padding: 20px 15px 15px 15px;
+    border-radius: 15px; 
+    background-color: #FFF;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+    // display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    // border: ${props => props.border}; /* border 추가 */
+    // position: relative;
+    border: ${(props) => (props.isSelected ? "3px solid #424BA5" : "3px solid transparent")};
+    position: relative;
+    gap: 15px;
+
+
+    display: ${(props) => (props.isHidden ? "none" : "flex")};
+`;
+const CardIcon = styled.img`
+    position: absolute;
+    top: 10px;
+    left: 10px;
+`;
+const CardTitleContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+`;
+const CardTitle = styled.p`
+    margin: 0;
+    // margin-bottom: 5px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+`;
+const CardSubTitle = styled.p`
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+`;
+const CardContent = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    height: 100%;
+`;
+const CardText = styled.p`
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 20px;
+    color: #333;
+    overflow: scroll;
+    &::-webkit-scrollbar{
+        display:none;
+    }
+    background-color: #E9ECF0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`;
+
+const CardDelete = styled.img`
+    display: ${(props) => (props.isSelected ? "block" : "none")};
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    // transition: display 0.2s ease-in;
+
+`;
+
+function Card2S(props){
+
+    const { deleteCard } = useCardContext();
+    const { card, onCardClick, isSelected, cardId } = props;
+
+    const cardRef = useRef(null); //Card 컴포넌트가 고유한 참조를 가지도록
+    // const [maxZIndex, setMaxZIndex] = useState(1); // 상태로 최대 z-index 값을 관리
+    // const [isCardClick, setIsCardClick] = useState(false);
+    // const [border, setBorder] = useState(0); //scamper,6hats 버튼 활성화
+
+    const handleClick = (e) => {
+        e.stopPropagation(); // 이벤트 버블링 방지
+        onCardClick();
+        console.log('card is clicked')
+        // setIsBack(!isBack);
+    };
+
+    const handleTouchStart = (e) => {
+        e.stopPropagation(); // 이벤트 버블링 방지
+        handleClick(e);
+    };
+
+    // onCardClick(index);
+
+    const handleDeleteCard = (e) => {
+        e.stopPropagation();
+        console.log('delete card')
+        deleteCard(cardId);
+    };
+
+    const handleDeleteTouch = (e) => {
+        e.stopPropagation();
+        handleDeleteCard(e);
+    };
+
+    return (
+        <Wrapper ref={cardRef}
+                // onClick={handleClick}
+                isHidden={card.isHidden}
+                onClick={handleClick}
+                onTouchStart={handleTouchStart}
+                isSelected={isSelected}
+        >
+            <CardIcon src={"/card_type=" + card.type + ".png"} width="30px"/>
+            <CardTitleContainer>
+                <CardTitle>{card.title}</CardTitle>
+                <CardSubTitle>{card.mainTitle}</CardSubTitle>
+            </CardTitleContainer> 
+            <CardContent>
+                <CardText>{card.content}</CardText>
+            </CardContent>
+
+            <CardDelete onClick={handleDeleteCard} onTouchStart={handleDeleteTouch} isSelected={isSelected} src="/delete.png" width="40px" />
+
+        </Wrapper>
+    )
+}
+
+export default Card2S;
