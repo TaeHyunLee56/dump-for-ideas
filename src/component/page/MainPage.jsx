@@ -9,14 +9,14 @@ const Wrapper = styled.div`
     min-height: 100vh;
 `;
 const Container = styled.div`
-    background-color: #F4F5F7;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     width: 100vw;
-    min-height: 100vh;
+    height: 100vh;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     padding: 60px 40px 40px 40px;
     gap: 24px;
 `;
@@ -25,13 +25,11 @@ const MainTitle = styled.h1`
     font-weight: 700;
     color: #666;
 `;
-const SubTitle = styled.p`
-    font-size: 16px;
-    font-weight: 400;
-    color: #333;
-`;
 const Title = styled.div`
-    margin-bottom: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
 `;
 const FeaturesContainer = styled.div`
     display: flex;
@@ -64,6 +62,7 @@ const FeatureDescription = styled.p`
     text-align: center;
 `;
 const Button = styled.div`
+    width: fit-content;
     padding: 12px 40px;
     background-color: #E6584A;
     border-radius: 999px;
@@ -94,7 +93,7 @@ function MainPage(props){
     const navigate = useNavigate();
 
     const defaultOptions = {
-        loop: false,
+        loop: true,
         autoplay: true,
         animationData: animationData.default,
         rendererSettings: {
@@ -107,12 +106,11 @@ function MainPage(props){
             <Container>
                 <Title>
                     <Lottie options={defaultOptions} width={800} height={200}/>
+                    <Button onClick={() => navigate('/canvas')}>Start</Button>
                 </Title>
 
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', marginTop: '60px' }}>
                     <MainTitle>AI-Powered Idea Brainstorming using Cards</MainTitle>
-                    <SubTitle>draw and discard cards</SubTitle>
-                </div>
                     <FeaturesContainer>
                         <FeatureItem>
                             <FeatureTitle>Generate New Insights</FeatureTitle>
@@ -127,16 +125,18 @@ function MainPage(props){
                             </FeatureDescription>
                         </FeatureItem>
                     </FeaturesContainer>
+                </div>
 
-                <Button onClick={() => navigate('/canvas')}>Start</Button>
+
             </Container>
 
 
             <Copyright>
-                Copyright 2024. All rights reserved.<br/>last updated: 2025.12.02
+                Ⓒ 2024 by Taehyun Lee<br/>last updated: 2025.12.02
             </Copyright>
         </Wrapper>
     );
 }
 
 export default MainPage;
+
