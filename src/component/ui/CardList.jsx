@@ -3,8 +3,6 @@ import styled from "styled-components";
 import { useCardContext } from '../../context/CardContext';
 import Card2 from "./Card2";
 import Card2S from "./Card2S";
-import Lottie from 'react-lottie';
-import * as animationData from '../../lotties/card_loading2.json';
 
 const Wrapper = styled.div`
     width: 100vw;
@@ -34,17 +32,6 @@ const CardsGrid = styled.div`
     padding-bottom: 120px;
 `;
 
-const LoadCard = styled.div`
-    width: 224px;
-    height: 300px;
-    position: absolute;
-    z-index: 50;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 16px;
-`;
 const LoadCardText = styled.p`
     font-size: 18px;
     font-weight: 600;
@@ -58,15 +45,6 @@ function CardList() {
 
     const onCardCard = (index) => {
         setSelectedCardIndex(index);
-    };
-
-    const defaultOptions = {
-        loop: true,
-        autoplay: true,
-        animationData: animationData.default,
-        rendererSettings: {
-            preserveAspectRatio: 'xMidYMid slice'
-        }
     };
 
     const renderCard = (card, index) => {
@@ -114,10 +92,7 @@ function CardList() {
     return(
         <Wrapper>
             {cardData.length === 0 ? (
-                <LoadCard>
-                    <Lottie options={defaultOptions} height={80} width={80}/>
-                    <LoadCardText>Loading cards...</LoadCardText>
-                </LoadCard>            
+                    <LoadCardText>No cards yet. Create your first card!</LoadCardText>
             ) : (
                 <CardsGrid>
                     {cardData.map((card, index) => renderCard(card, index))}

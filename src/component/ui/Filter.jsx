@@ -110,7 +110,7 @@ function Filter(props) {
 
     const handleInputChange = (e) => {
         setFilterData(e.target.value);
-        console.log('태그아이템: ' + filterData)
+        // console.log('태그아이템: ' + filterData)
     };
 
     const handleInputBlur = async () => {
@@ -121,7 +121,7 @@ function Filter(props) {
         }
     };
 
-    console.log('이 캔버스의 필터값: ' + filterData);
+    // console.log('이 캔버스의 필터값: ' + filterData);
 
     return (
         <Wrapper

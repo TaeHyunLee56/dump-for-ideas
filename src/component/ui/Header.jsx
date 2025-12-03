@@ -40,7 +40,7 @@ const ToggleBtn = styled.div`
     border-radius: 999px;
     background-color: #FFF;
     position: absolute;
-    left: ${props => (props.toggled ? 'calc(100% - 30px)' : '2px')}; /* 상태에 따라 위치 변경 */
+    left: ${props => (props.$toggled ? 'calc(100% - 30px)' : '2px')}; /* 상태에 따라 위치 변경 */
     transition: left 0.3s;
 `;
 const ToggleCanvas = styled.img`
@@ -99,12 +99,12 @@ function Header(props){
             <HeadTitleContainer>
                 <img onClick={()=>{navigate('/')}} src={"/icon/back.png"} width="32px" alt="back"/>
                 <EditCanvasContent onClick={handleDeleteHiddenCards}>
-                    Empty Trash
+                    휴지통 비우기
                 </EditCanvasContent>
             </HeadTitleContainer>
             
             <ToggleContainer onClick={onToggle}>
-                <ToggleBtn toggled={toggled}></ToggleBtn>
+                <ToggleBtn $toggled={toggled}></ToggleBtn>
                 <ToggleCanvas
                     src={`/toggleCanvas=${toggled ? "inactive" : "active"}.png`}
                     width="28px"

@@ -53,7 +53,7 @@ const ColorSelect = styled.input`
 
 function Draw({ imageCanvasRef, drawingCanvasRef }) {
     const [drawing, setDrawing] = useState(false);
-    const [color, setColor] = useState('black');
+    const [color, setColor] = useState('#000000');
     const [isErasing, setIsErasing] = useState(false);
     const [imageUploaded, setImageUploaded] = useState(false);
     const drawingContext = useRef(null);
@@ -66,19 +66,19 @@ function Draw({ imageCanvasRef, drawingCanvasRef }) {
         const imageCanvas = imageCanvasRef.current;
         imageContext.current = imageCanvas.getContext('2d');
 
-        console.log("Canvas contexts initialized:", drawingContext.current, imageContext.current);
+        // console.log("Canvas contexts initialized:", drawingContext.current, imageContext.current);
     }, [drawingCanvasRef, imageCanvasRef]);
 
     const startDrawing = (e) => {
         setDrawing(true);
         draw(e);
-        console.log("Start Drawing");
+        // console.log("Start Drawing");
     };
 
     const finishDrawing = () => {
         setDrawing(false);
         drawingContext.current.beginPath();
-        console.log("Finish Drawing");
+        // console.log("Finish Drawing");
     };
 
     const draw = (e) => {

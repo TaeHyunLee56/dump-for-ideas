@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
 
-import Lottie from 'react-lottie';
-import * as animationData from '../../lotties/loading.json';
-import * as animationData2 from '../../lotties/card_loading2.json';
-import * as animationData3 from '../../lotties/card_loading3.json';
+import Lottie from 'lottie-react';
+import animationData from '../../lotties/loading.json';
+import animationData2 from '../../lotties/card_loading2.json';
+import animationData3 from '../../lotties/card_loading3.json';
 
 import styled, { keyframes } from "styled-components";
 
@@ -42,7 +42,7 @@ const Add6hats = styled.img`
 const Box2 = styled.img`
     position: fixed;
     left: calc(50% - 40px);
-    bottom: ${props => (props.boxState ? '8px' : '-80px')}; /* 상태에 따라 위치 변경 */
+    bottom: ${props => (props.$boxState ? '8px' : '-80px')}; /* 상태에 따라 위치 변경 */
     transition: bottom 0.2s ease-in-out;
         z-index: 1000;
 `;
@@ -106,9 +106,9 @@ const BoxCard = styled.div`
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     position: fixed;
     left: calc(50% - 74px);
-    bottom: ${(props) => props.bottom}px;
-    z-index: ${(props) => props.zIndex};
-    transform: ${(props) => props.transform};
+    bottom: ${(props) => props.$bottom}px;
+    z-index: ${(props) => props.$zIndex};
+    transform: ${(props) => props.$transform};
     transition: bottom 0.2s ease-in-out;
 `;
 const BoxCard2 = styled(BoxCard)`
@@ -119,7 +119,7 @@ const BoxCard3 = styled(BoxCard)`
 `;
 
 function Canvas(props) {
-    const { apiKey } = useContext(ApiKeyContext);
+    const { apiKey, setApiKeyError } = useContext(ApiKeyContext);
     const { cardData, filterData, updateCardHats, addCard } = useCardContext();
 
     const [hiddenTitles, setHiddenTitles] = useState([]);   // Titles of discarded cards
@@ -149,7 +149,7 @@ function Canvas(props) {
 
 useEffect(() => {
     const hiddenContentsString = hiddenTitles.join(', ');
-    console.log(hiddenContentsString)
+    // console.log(hiddenContentsString)
     const newPrompt = `
         <참고데이터> 내용 전체 혹은 일부를 참고하여, 제품 및 서비스 아이디어를 <요구사항>에 맞게 1개 만든 후, 구체적인 내용을 <출력형식>에 맞춰 출력한다.
         <요구사항>
@@ -163,14 +163,14 @@ useEffect(() => {
 
     setPrompt(newPrompt);
 
-    console.log(newPrompt)
+    // console.log(newPrompt)
 
 }, [filterData, hiddenTitles]); // canvasData.filter와 hiddenTitles에 의존
 
     
-    console.log(cardData);
-    console.log(hiddenTitles);
-    console.log(filterData);
+    // console.log(cardData);
+    // console.log(hiddenTitles);
+    // console.log(filterData);
 
     //GPTapi 사용
     const endpoint = "https://api.openai.com/v1/chat/completions";
@@ -195,11 +195,23 @@ useEffect(() => {
                 })
             });
             const data = await response.json();
-            console.log("API 응답:", data); 
+            // console.log("API 응답:", data); 
+            
+            // API 키 관련 에러 체크
+            if (response.status === 401 || response.status === 403 || (data.error && (
+                data.error.message?.toLowerCase().includes('api key') ||
+                data.error.message?.toLowerCase().includes('authentication') ||
+                data.error.message?.toLowerCase().includes('invalid') ||
+                data.error.message?.toLowerCase().includes('unauthorized')
+            ))) {
+                setApiKeyError(true);
+                setLoading(false);
+                return;
+            }
                 
             if (data.choices && data.choices.length > 0) {
                 const responseText = data.choices[0].message.content;
-                console.log("응답 텍스트:", responseText); 
+                // console.log("응답 텍스트:", responseText); 
                     
                 const parsedResult = parseResponse(responseText);
                 
@@ -209,7 +221,7 @@ useEffect(() => {
                     <출력형식> - 정보:, - 감정:, - 이점:, - 위험:, - 창의:, - 정리:. 
                 `;
     
-                console.log(prompt6Hats);
+                // console.log(prompt6Hats);
     
                 // DALL-E로 이미지 생성
                 const imageUrl = await generateImageWithDalle(parsedResult.content);
@@ -275,7 +287,7 @@ useEffect(() => {
     // DALL-E로 이미지 생성
     const generateImageWithDalle = async (content) => {
         try {
-            console.log('DALL-E 이미지 생성 시작:', content);
+            // console.log('DALL-E 이미지 생성 시작:', content);
             
             // Convert Korean content to simple English prompt
             const imagePrompt = `A simple, minimalist illustration representing: ${content.substring(0, 100)}. Clean design, soft colors, friendly style.`;
@@ -295,11 +307,22 @@ useEffect(() => {
             });
 
             const data = await response.json();
-            console.log('DALL-E 응답:', data);
+            // console.log('DALL-E 응답:', data);
+
+            // API 키 관련 에러 체크
+            if (response.status === 401 || response.status === 403 || (data.error && (
+                data.error.message?.toLowerCase().includes('api key') ||
+                data.error.message?.toLowerCase().includes('authentication') ||
+                data.error.message?.toLowerCase().includes('invalid') ||
+                data.error.message?.toLowerCase().includes('unauthorized')
+            ))) {
+                setApiKeyError(true);
+                return null;
+            }
 
             if (data.data && data.data.length > 0) {
                 const imageUrl = data.data[0].url;
-                console.log('생성된 이미지 URL:', imageUrl);
+                // console.log('생성된 이미지 URL:', imageUrl);
                 return imageUrl;
             } else {
                 console.error('DALL-E 이미지 생성 실패');
@@ -327,11 +350,22 @@ useEffect(() => {
             });
             
             const data = await response.json();
-            console.log("API 응답:", data); // 응답 구조 확인
+            // console.log("API 응답:", data); // 응답 구조 확인
+            
+            // API 키 관련 에러 체크
+            if (response.status === 401 || response.status === 403 || (data.error && (
+                data.error.message?.toLowerCase().includes('api key') ||
+                data.error.message?.toLowerCase().includes('authentication') ||
+                data.error.message?.toLowerCase().includes('invalid') ||
+                data.error.message?.toLowerCase().includes('unauthorized')
+            ))) {
+                setApiKeyError(true);
+                return null;
+            }
             
             if (data.choices && data.choices.length > 0) {
                 const responseText = data.choices[0].message.content;
-                console.log("6 hats 응답 텍스트:", responseText); // 텍스트 확인
+                // console.log("6 hats 응답 텍스트:", responseText); // 텍스트 확인
                 
                 // 6 hats 응답을 파싱
                 const parsedHats = parse6HatsResponse(responseText);
@@ -398,11 +432,11 @@ useEffect(() => {
     };
 
     useEffect(() => {
-        console.log('Selected card title: ' + selectedCardTitle);
-        console.log('Selected card content: ' + selectedCardContent);
-        console.log('Selected card type: ' + selectedCardType);
-        console.log('Selected card index: ' + selectedCardIndex);
-        console.log('Selected card hats: ' + JSON.stringify(selectedCardHats));
+        // console.log('Selected card title: ' + selectedCardTitle);
+        // console.log('Selected card content: ' + selectedCardContent);
+        // console.log('Selected card type: ' + selectedCardType);
+        // console.log('Selected card index: ' + selectedCardIndex);
+        // console.log('Selected card hats: ' + JSON.stringify(selectedCardHats));
     }, [selectedCardIndex, selectedCardTitle, selectedCardContent, selectedCardType, selectedCardId, selectedCardHats]);
 
 
@@ -420,7 +454,7 @@ useEffect(() => {
     
     const callScamper = async () => {
         setLoadingScamper(true);
-        console.log(promptScamper)
+        // console.log(promptScamper)
         try {
             const response = await fetch(endpoint, {
                 method: 'POST',
@@ -435,11 +469,23 @@ useEffect(() => {
             });
             
             const data = await response.json();
-            console.log("API 응답:", data); // 응답 구조 확인
+            // console.log("API 응답:", data); // 응답 구조 확인
+            
+            // API 키 관련 에러 체크
+            if (response.status === 401 || response.status === 403 || (data.error && (
+                data.error.message?.toLowerCase().includes('api key') ||
+                data.error.message?.toLowerCase().includes('authentication') ||
+                data.error.message?.toLowerCase().includes('invalid') ||
+                data.error.message?.toLowerCase().includes('unauthorized')
+            ))) {
+                setApiKeyError(true);
+                setLoadingScamper(false);
+                return;
+            }
             
             if (data.choices && data.choices.length > 0) {
                 const responseText = data.choices[0].message.content;
-                console.log("scamper 응답 텍스트:", responseText); // 텍스트 확인
+                // console.log("scamper 응답 텍스트:", responseText); // 텍스트 확인
                 
                 const parsedScamper = parseScamperResponse(responseText);
                 
@@ -519,6 +565,7 @@ useEffect(() => {
     const handlePageClick = () => {
         if (isCardClick) {
             setAddContainerOpacity(20);
+            setIsCardClick(false);
         }
         setSelectedCardIndex(null);
         setBackedCardIndex(null);
@@ -623,10 +670,10 @@ useEffect(() => {
             setAddContainerOpacity(20);
     
             if (selectedCardType === "scamper") {
-                console.log('Scamper card was clicked!');
+                // console.log('Scamper card was clicked!');
     
                 const cardId = selectedCardId; // Card ID
-                console.log("선택된 cardId:", cardId); // cardId 확인을 위한 로그
+                // console.log("선택된 cardId:", cardId); // cardId 확인을 위한 로그
                 
                 // selectedCardHats가 올바르게 설정되었는지 확인
                 if (!selectedCardHats || typeof selectedCardHats !== 'object') {
@@ -640,7 +687,7 @@ useEffect(() => {
                 );
     
                 if (!isGeneratingHats) {
-                    console.log('Hats has already been generated or has other content.');
+                    // console.log('Hats has already been generated or has other content.');
                     return;
                 }
     
@@ -652,7 +699,7 @@ useEffect(() => {
     
                 try {
                     const parsedHats = await callGPT6Hats(prompt6HatsForScamer); // GPT 결과를 받아옴
-                    console.log('parsedHats:', parsedHats); // parsedHats의 실제 값 출력
+                    // console.log('parsedHats:', parsedHats); // parsedHats의 실제 값 출력
     
                     if (parsedHats) {
                         update6HatsForSelectedCard(cardId, parsedHats); // Firebase에 업데이트
@@ -674,7 +721,7 @@ useEffect(() => {
     //     setBoxState(newBoxState)
     // }
     useEffect(() => {
-        console.log('박스 상태: ' + boxState)
+        // console.log('박스 상태: ' + boxState)
     }, [boxState]);
 
     useEffect(() => {
@@ -685,32 +732,6 @@ useEffect(() => {
         }
     }, [boxState]);
 
-    const defaultOptions = {
-        loop: true,
-        autoplay: true,
-        animationData: animationData.default,
-        rendererSettings: {
-            preserveAspectRatio: 'xMidYMid slice'
-        }
-    };
-
-    const defaultOptions2 = {
-        loop: true,
-        autoplay: true,
-        animationData: animationData2.default,
-        rendererSettings: {
-            preserveAspectRatio: 'xMidYMid slice'
-        }
-    };
-
-    const defaultOptions3 = {
-        loop: true,
-        autoplay: true,
-        animationData: animationData3.default,
-        rendererSettings: {
-            preserveAspectRatio: 'xMidYMid slice'
-        }
-    };
 
 
     const sizes = [0.5, 0.8, 1, 1.2, 1.5];
@@ -731,10 +752,10 @@ useEffect(() => {
     // Added validation and logging for selectedCardType
     useEffect(() => {
         const validCardTypes = ['idea', 'insight', 'scamper']; // Define valid card types
-        if (!validCardTypes.includes(selectedCardType)) {
+        if (selectedCardType && !validCardTypes.includes(selectedCardType)) {
             console.error(`Unknown card type: ${selectedCardType}`);
         } else {
-            console.log(`Selected card type is valid: ${selectedCardType}`);
+            // console.log(`Selected card type is valid: ${selectedCardType}`);
         }
     }, [selectedCardType, selectedCardContent, selectedCardId, selectedCardHats]);
 
@@ -745,14 +766,14 @@ useEffect(() => {
                     {/* Second loading: displayed when loading is true */}
                     {loading && (
                         <LoadCard2>
-                            <Lottie options={defaultOptions} height={80} width={80} />
-                            <LoadCardText>Creating card...</LoadCardText>
+                            <Lottie animationData={animationData} loop={true} style={{ width: 80, height: 80 }} />
+                            <LoadCardText>카드를 만들고 있어요</LoadCardText>
                         </LoadCard2>
                     )}
                     {loadingScamper && (
                         <LoadCard3>
-                            <Lottie options={defaultOptions3} height={80} width={80} />
-                            <LoadCardText>Creating card...</LoadCardText>
+                            <Lottie animationData={animationData3} loop={true} style={{ width: 80, height: 80 }} />
+                            <LoadCardText>카드를 만들고 있어요</LoadCardText>
                         </LoadCard3>
                     )}
 
@@ -763,12 +784,12 @@ useEffect(() => {
 
                             {cardLoading ? (
                                 <LoadCard>
-                                    <Lottie options={defaultOptions2} height={80} width={80} />
+                                    <Lottie animationData={animationData2} loop={true} style={{ width: 80, height: 80 }} />
                                     <LoadCardText>Loading card...</LoadCardText>
                                 </LoadCard>
                             ) : (
                                 <div>
-                                    {cardData.map((card, index) => {
+                                    {cardData.filter(card => !card.isHidden).map((card, index) => {
                                         switch (card.type) {
                                             case 'idea':
                                                 return (
@@ -826,24 +847,24 @@ useEffect(() => {
 
                             <div>
                                 <BoxCard
-                                    zIndex={zIndices[0]}
-                                    bottom={bottoms[0]}
+                                    $zIndex={zIndices[0]}
+                                    $bottom={bottoms[0]}
                                     onTouchStart={(e) => handleTouchStart(0, e)}
                                     onTouchMove={handleTouchMove}
                                     onTouchEnd={handleTouchEnd}
                                     onClick={boxClick}
                                 />
                                 <BoxCard2
-                                    zIndex={zIndices[1]}
-                                    bottom={bottoms[1]}
+                                    $zIndex={zIndices[1]}
+                                    $bottom={bottoms[1]}
                                     onTouchStart={(e) => handleTouchStart(1, e)}
                                     onTouchMove={handleTouchMove}
                                     onTouchEnd={handleTouchEnd}
                                     onClick={boxClick}
                                 />
                                 <BoxCard3
-                                    zIndex={zIndices[2]}
-                                    bottom={bottoms[2]}
+                                    $zIndex={zIndices[2]}
+                                    $bottom={bottoms[2]}
                                     onTouchStart={(e) => handleTouchStart(2, e)}
                                     onTouchMove={handleTouchMove}
                                     onTouchEnd={handleTouchEnd}
@@ -851,7 +872,7 @@ useEffect(() => {
                                 />
                             </div>
 
-                            <Box2 boxState={boxState} src="/icon/mainTrash.png" width="80px"/>
+                            <Box2 $boxState={boxState} src="/icon/mainTrash.png" width="80px"/>
 
                             <SizeContainer>
                                 <img

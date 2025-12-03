@@ -1,15 +1,25 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import styled from "styled-components";
-import Lottie from 'react-lottie';
-import * as animationData from '../../lotties/logo.json';
+import styled, { keyframes } from "styled-components";
+import Lottie from 'lottie-react';
+import animationData from '../../lotties/logo.json';
+
+const gradientAnimation = keyframes`
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+`;
 
 const Wrapper = styled.div`
-    width: 100vw;
-    min-height: 100vh;
-`;
-const Container = styled.div`
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    background: linear-gradient(-45deg,rgb(181, 186, 201),rgb(181, 191, 205), #F4F5F7, #e5e7eb, #d9dce3);
+    background-size: 400% 400%;
+    animation: ${gradientAnimation} 8s ease infinite;
     width: 100vw;
     height: 100vh;
     overflow-y: auto;
@@ -17,49 +27,15 @@ const Container = styled.div`
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 60px 40px 40px 40px;
     gap: 24px;
-`;
-const MainTitle = styled.h1`
-    font-size: 24px;
-    font-weight: 700;
-    color: #666;
+    position: relative;
 `;
 const Title = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 24px;
-`;
-const FeaturesContainer = styled.div`
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 60px;
-`;
-const FeatureItem = styled.div`
-    width: 400px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    background-color: #fff;
-    padding: 24px;
-    border-radius: 12px;
-    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
-`;
-const FeatureTitle = styled.p`
-    font-size: 16px;
-    font-weight: 600;
-    color: #333;
-`;
-const FeatureDescription = styled.p`
-    font-size: 14px;
-    font-weight: 400;
-    color: #666;
-    text-align: center;
+    gap: 60px;
+    margin-bottom: 120px;
 `;
 const Button = styled.div`
     width: fit-content;
@@ -80,7 +56,8 @@ const Button = styled.div`
     }
 `;
 const Copyright = styled.p`
-    padding: 40px 0 ;
+    position: absolute;
+    bottom: 40px;
     font-size: 12px;
     font-weight: 400;
     color: #969BA4;
@@ -92,47 +69,16 @@ const Copyright = styled.p`
 function MainPage(props){
     const navigate = useNavigate();
 
-    const defaultOptions = {
-        loop: true,
-        autoplay: true,
-        animationData: animationData.default,
-        rendererSettings: {
-            preserveAspectRatio: 'xMidYMid meet'
-        }
-    };
 
     return(
         <Wrapper>
-            <Container>
                 <Title>
-                    <Lottie options={defaultOptions} width={800} height={200}/>
+                    <Lottie animationData={animationData} loop={true} style={{ width: 800, height: 200 }} />
                     <Button onClick={() => navigate('/canvas')}>Start</Button>
                 </Title>
 
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', marginTop: '60px' }}>
-                    <MainTitle>AI-Powered Idea Brainstorming using Cards</MainTitle>
-                    <FeaturesContainer>
-                        <FeatureItem>
-                            <FeatureTitle>Generate New Insights</FeatureTitle>
-                            <FeatureDescription>
-                                Draw new 'Insight' cards based on your past ideas, <br/>including those you've dumped.
-                            </FeatureDescription>
-                        </FeatureItem>
-                        <FeatureItem>
-                            <FeatureTitle>Expand & Review Ideas</FeatureTitle>
-                            <FeatureDescription>
-                                Develop your ideas using the Scamper Technique <br/> and critically review them with the 6 Hats Method.
-                            </FeatureDescription>
-                        </FeatureItem>
-                    </FeaturesContainer>
-                </div>
-
-
-            </Container>
-
-
             <Copyright>
-                Ⓒ 2024 by Taehyun Lee<br/>last updated: 2025.12.02
+                Ⓒ 2024 Taehyun Lee
             </Copyright>
         </Wrapper>
     );

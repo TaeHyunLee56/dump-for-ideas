@@ -7,9 +7,10 @@ export const ApiKeyContext = createContext();
 export const ApiKeyProvider = ({ children }) => {
   // API 키를 Context로만 관리 (localStorage 사용 안 함)
   const [apiKey, setApiKey] = useState(null);
+  const [apiKeyError, setApiKeyError] = useState(false);
 
   return (
-    <ApiKeyContext.Provider value={{ apiKey, setApiKey }}>
+    <ApiKeyContext.Provider value={{ apiKey, setApiKey, apiKeyError, setApiKeyError }}>
       {children}
     </ApiKeyContext.Provider>
   );

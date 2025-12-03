@@ -12,16 +12,17 @@ const Wrapper = styled.div`
     width: ${props => props.width}px;
     height: ${props => props.height}px;
     position: absolute; 
-    border: ${(props) => (props.isBackCard ? "2px solid transparent" : props.isSelected ? "2px solid #424BA5" : "2px solid transparent")};
+    border: ${(props) => (props.$isBackCard ? "2px solid transparent" : props.$isSelected ? "2px solid #424BA5" : "2px solid transparent")};
     border-radius: 14px;
     transition: border 0.1s ease-in;
-    display: ${(props) => (props.isHidden ? "none" : "block")};
-    opacity: ${(props) => (props.isBeforeHidden ? "10%" : "100%")};
+    display: ${(props) => (props.$isHidden ? "none" : "block")};
+    opacity: ${(props) => (props.$isBeforeHidden ? "10%" : "100%")};
     transition: opacity 0.1s ease-in;
     transform: scale(${(props) => props.scale});
     transform-origin: center center; /* 스케일의 기준점 */
     user-select: none;
     perspective: 1000px; /* 3D 효과를 위한 원근법 설정 */
+    touch-action: none; /* preventDefault를 사용하기 위해 */
 
 `;
 
@@ -33,7 +34,7 @@ const CardFace = styled(motion.div)`
     padding: 16px 12px 12px 12px;
     border-radius: 12px;
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
-    background-color: ${props => (props.isBack ? '#5F6471' : '#FFF')};
+    background-color: ${props => (props.$isBack ? '#5F6471' : '#FFF')};
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -43,7 +44,7 @@ const CardFace = styled(motion.div)`
     transform-style: preserve-3d;
 `;
 const CardEdit = styled.img`
-    display: ${(props) => (props.isSelected ? "block" : "none")};
+    display: ${(props) => (props.$isSelected ? "block" : "none")};
     position: absolute;
     right: 8px;
     bottom: 8px;
@@ -135,7 +136,7 @@ const ModalButton = styled.button`
     cursor: pointer;
     border: none;
     transition: all 0.2s;
-    ${props => props.primary ? `
+    ${props => props.$primary ? `
         background-color: #424BA5;
         color: #fff;
         &:hover {
@@ -163,7 +164,7 @@ const CardTitle = styled.p`
     margin: 0;
     font-size: 14px;
     font-weight: 600;
-    color: ${props => (props.isBack ? '#FFF' : '#333')};
+    color: ${props => (props.$isBack ? '#FFF' : '#333')};
 `;
 const CardContent = styled.div`
     display: flex;
@@ -174,7 +175,7 @@ const CardContent = styled.div`
 const CardImage = styled.div`
     width: 196px;
     height: 116px;
-    background-image: url(${props => props.image});
+    background-image: url(${props => props.$image});
     background-size: cover;
     background-color: #E9ECF0;
 `;
@@ -318,8 +319,8 @@ function Card({ card, cardId, type, onCardClick, isBackCard, isClickCard, isSele
         const max_y = window.innerHeight;
 
         if( x >= min_x - size.width && x <= max_x && y >= min_y && y<= max_y){
-            console.log('Located in between');
-            console.log(`Card index located in between: ${index}`);
+            // console.log('Located in between');
+            // console.log(`Card index located in between: ${index}`);
 
             setIsHidden(true); // Hide card
             onBoxStateChange(false); // Card deck comes up
@@ -332,19 +333,25 @@ function Card({ card, cardId, type, onCardClick, isBackCard, isClickCard, isSele
     const handleClick = (e) => {
         if (isDragging) return; // Don't execute function if dragging
         e.stopPropagation(); // Prevent event bubbling
+        if (e.cancelable) {
+            e.preventDefault(); // Prevent default behavior only if cancelable
+        }
         
         onCardClick();
-        console.log('card is clicked')
+        // console.log('card is clicked')
         // setIsBack(!isBack);
     };
 
     const handleTouchStart = (e) => {
         e.stopPropagation(); // Prevent event bubbling
+        if (e.cancelable) {
+            e.preventDefault(); // Prevent default behavior only if cancelable
+        }
         handleClick(e);
     }
 
     const [scale, setScale] = useState(cardSize); // Manage scale value
-    console.log('Card size: ' + cardSize)
+    // console.log('Card size: ' + cardSize)
 
     useEffect(()=>{
         setScale(cardSize)
@@ -387,7 +394,7 @@ function Card({ card, cardId, type, onCardClick, isBackCard, isClickCard, isSele
 
     const handleToolTip = (e) => {
         e.stopPropagation();
-        console.log('Tooltip clicked')
+        // console.log('Tooltip clicked')
         if(card.type === 'idea'){
             setIsToolTipIdea(!isToolTipIdea)
             setIsToolTip6Hats(false);
@@ -450,7 +457,6 @@ function Card({ card, cardId, type, onCardClick, isBackCard, isClickCard, isSele
         <>
         <Draggable
             // ref={cardRef}
-            className={`card card-${index}`} // 고유 클래스 이름
             position={position}
             onDrag={(e, data) => handleOnDrag(e, data)} // 드래그 시 실행되는 부분
             onStop={(e, data) => handleStopDrag(e, data)} // 드롭 시 실행되는 부분
@@ -460,7 +466,7 @@ function Card({ card, cardId, type, onCardClick, isBackCard, isClickCard, isSele
             handle=".drag" // 특정 클래스만 드래그 가능
             bounds={bounds}
         >
-            <div>
+            <div className={`card card-${index}`}>
 
                 <Resizable
                     width={size.width}
@@ -471,12 +477,12 @@ function Card({ card, cardId, type, onCardClick, isBackCard, isClickCard, isSele
                     <Wrapper 
                         onClick={handleClick}
                         onTouchStart={handleTouchStart}
-                        isSelected={isSelected} 
-                        isBackCard={isBackCard}
+                        $isSelected={isSelected} 
+                        $isBackCard={isBackCard}
                         // onTouchEnd={handleTouchEnd}
                         // isHidden={card.isHidden}
-                        isHidden={isHidden}
-                        isBeforeHidden={isBeforeHidden}
+                        $isHidden={isHidden}
+                        $isBeforeHidden={isBeforeHidden}
                         // zIndex={zIndex}
 
                         width={size.width}
@@ -516,13 +522,13 @@ function Card({ card, cardId, type, onCardClick, isBackCard, isClickCard, isSele
                                         src={"/card_type=" + card.type + ".png"} width="24px" />
                                     <CardTitle>{card.title}</CardTitle>
                                     <CardContent>
-                                        <CardImage image={card.imageUrl || card.imagePath || ''}/>
+                                        <CardImage $image={card.imageUrl || card.imagePath || ''}/>
                                         {/* <CardTag /> */}
                                         <CardText>{card.content}</CardText>
                                     </CardContent>
 
                                     <CardEdit 
-                                        isSelected={isSelected} 
+                                        $isSelected={isSelected} 
                                         src="/edit.png" 
                                         width="32px"
                                         onClick={handleEditClick}
@@ -537,13 +543,13 @@ function Card({ card, cardId, type, onCardClick, isBackCard, isClickCard, isSele
                                     animate={{ rotateY: 0 }}
                                     exit={{ rotateY: 0 }}
                                     transition={{ duration: 0.6 }}
-                                    isBack={true}
+                                    $isBack={true}
                                 >
                                     <CardIcon
                                         onTouchStart={(e)=>handleToolTip6Hats(e)} 
                                         src="/card_type=6hats.png" width="24px"
                                     />
-                                    <CardTitle isBack={true}>6HATS</CardTitle>
+                                    <CardTitle $isBack={true}>6HATS</CardTitle>
                                     <CardTap onClick={(event)=>handleTabContainerClick(event)} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '2px' }}>
                                         {Object.keys(tabColors).map(tab => (
                                             <div
@@ -565,7 +571,7 @@ function Card({ card, cardId, type, onCardClick, isBackCard, isClickCard, isSele
                                             </div>
                                         ))}
                                     </CardTap>
-                                    <CardText6 isBack={true}>
+                                    <CardText6>
                                         {card.hats && card.hats[activeTab] ? card.hats[activeTab] : 'No review content available.'}
                                     </CardText6>
                                 </CardFace>
@@ -605,7 +611,7 @@ function Card({ card, cardId, type, onCardClick, isBackCard, isClickCard, isSele
                         <ModalButton onClick={handleCancelEdit}>
                             Cancel
                         </ModalButton>
-                        <ModalButton primary onClick={handleSaveEdit}>
+                        <ModalButton $primary onClick={handleSaveEdit}>
                             Save
                         </ModalButton>
                     </ModalButtonContainer>

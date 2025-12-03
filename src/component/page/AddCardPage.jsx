@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence  } from "framer-motion";
 import { ApiKeyContext } from '../../context';
 import { useCardContext } from '../../context/CardContext';
-import Lottie from 'react-lottie';
-import * as animationData from '../../lotties/card_loading.json';
+import Lottie from 'lottie-react';
+import animationData from '../../lotties/card_loading.json';
 import styled from "styled-components";
 import Button from "../ui/Button";
 import Draw from "../ui/Draw";
@@ -65,8 +65,8 @@ const AddContainer = styled.div`
     align-items: center;
     gap: 32px;
     position: relative;
-    opacity: ${props => (props.loading ? '0' : '1')};
-    transform: ${props => (props.loading ? 'scale(0.3)' : 'scale(1)')};
+    opacity: ${props => (props.$loading ? '0' : '1')};
+    transform: ${props => (props.$loading ? 'scale(0.3)' : 'scale(1)')};
     transition: transform opacity 0.3s ease-in;
 `;
 const LoadCard = styled.div`
@@ -165,21 +165,21 @@ const CardTextBack = styled.p`
 function AddCardPage(props) {
 
     const navigate = useNavigate();
-    const { apiKey } = useContext(ApiKeyContext);
+    const { apiKey, setApiKeyError } = useContext(ApiKeyContext);
     const { addCard } = useCardContext();
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     
     const [loading, setLoading] = useState(false);
     useEffect(()=>{
-        console.log(loading);
+        // console.log(loading);
     },[loading])
 
     const endpoint = "https://api.openai.com/v1/chat/completions";
 
     const prompt6Hats = `${content}에 대해 6hats 기법으로 정리해줘. - 정보:, - 감정:, - 이점:, - 위험:, - 창의:, - 정리:.`;
     const callGPT6Hats = async (prompt6Hats) => {
-        console.log(prompt6Hats)
+        // console.log(prompt6Hats)
         try {
             const response = await fetch(endpoint, {
                 method: 'POST',
@@ -194,11 +194,23 @@ function AddCardPage(props) {
             });
             
             const data = await response.json();
-            console.log("API 응답:", data); // 응답 구조 확인
+            // console.log("API 응답:", data); // 응답 구조 확인
+            
+            // API 키 관련 에러 체크
+            if (response.status === 401 || response.status === 403 || (data.error && (
+                data.error.message?.toLowerCase().includes('api key') ||
+                data.error.message?.toLowerCase().includes('authentication') ||
+                data.error.message?.toLowerCase().includes('invalid') ||
+                data.error.message?.toLowerCase().includes('unauthorized')
+            ))) {
+                setApiKeyError(true);
+                setLoading(false);
+                return null;
+            }
             
             if (data.choices && data.choices.length > 0) {
                 const responseText = data.choices[0].message.content;
-                console.log("6 hats 응답 텍스트:", responseText); // 텍스트 확인
+                // console.log("6 hats 응답 텍스트:", responseText); // 텍스트 확인
                 
                 // 6 hats 응답을 파싱
                 const parsedHats = parse6HatsResponse(responseText);
@@ -254,7 +266,7 @@ function AddCardPage(props) {
 
     useEffect(() => {
         if (imageCanvasRef.current && drawingCanvasRef.current && combinedCanvasRef.current) {
-            console.log('All canvases are initialized');
+            // console.log('All canvases are initialized');
         } else {
             console.error('One or more canvases are not initialized');
         }
@@ -289,7 +301,7 @@ function AddCardPage(props) {
     const handleSave = async () => {
         if (!title || !content) return; // Make input fields red if empty
 
-        console.log('Save card clicked');
+        // console.log('Save card clicked');
         setLoading(true); // Set loading state when save is clicked
 
         // 먼저 캔버스를 병합하고 URL을 생성합니다.
@@ -322,7 +334,7 @@ function AddCardPage(props) {
                 isHidden: false
             });
 
-            console.log('Card successfully added to context!');
+            // console.log('Card successfully added to context!');
             
             // Navigate after a slight delay to show loading animation
             setTimeout(() => {
@@ -343,14 +355,6 @@ function AddCardPage(props) {
         return () => clearInterval(flipInterval);
     }, []);
 
-    const defaultOptions = {
-        loop: true,
-        autoplay: true,
-        animationData: animationData.default,
-        rendererSettings: {
-            preserveAspectRatio: 'xMidYMid slice'
-        }
-    };
 
     return (
         <Wrapper>
@@ -391,8 +395,8 @@ function AddCardPage(props) {
                             // isFlip={true}
                         >
                             {/* Content to show on front side */}
-                            <Lottie options={defaultOptions} height={80} width={80}/>
-                            <CardTextBack>Saving card...</CardTextBack>
+                            <Lottie animationData={animationData} loop={true} style={{ width: 80, height: 80 }} />
+                            <CardTextBack>카드를 저장하고 있어요</CardTextBack>
                         </CardFaceBack>
                         )}
                     </AnimatePresence>
@@ -401,7 +405,7 @@ function AddCardPage(props) {
 
             {!loading && (<CloseIcon src="/icon/close2.png" width="32px" onClick={()=>{navigate(-1)}}/>)}
 
-            <AddContainer loading={loading}>
+            <AddContainer $loading={loading}>
                 <StyledInput type="text" placeholder="Enter title" maxLength="12"  onChange={(e)=>setTitle(e.target.value)}></StyledInput>
                 <Draw imageCanvasRef={imageCanvasRef} drawingCanvasRef={drawingCanvasRef} />
                 {/* <Draw canvasRef={canvasRef}></Draw> */}

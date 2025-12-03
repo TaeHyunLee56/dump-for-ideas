@@ -157,7 +157,7 @@ const ModalButton = styled.button`
     cursor: pointer;
     border: none;
     transition: all 0.2s;
-    ${props => props.primary ? `
+    ${props => props.$primary ? `
         background-color: #424BA5;
         color: #fff;
         &:hover {
@@ -177,7 +177,7 @@ const ModalButton = styled.button`
 `;
 
 function CanvasPage(props) {
-    const { apiKey, setApiKey } = useContext(ApiKeyContext);
+    const { apiKey, setApiKey, apiKeyError, setApiKeyError } = useContext(ApiKeyContext);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [inputApiKey, setInputApiKey] = useState(apiKey || '');
     const [toggled, setToggled] = useState(false);
@@ -192,14 +192,18 @@ function CanvasPage(props) {
     };
 
     useEffect(() => {
-        if (!apiKey) {
+        if (!apiKey || apiKeyError) {
             setIsModalOpen(true);
+            if (apiKeyError) {
+                setInputApiKey(''); // 에러 발생 시 입력 필드 초기화
+            }
         }
-    }, [apiKey]);
+    }, [apiKey, apiKeyError]);
 
     const handleSaveApiKey = () => {
         if (inputApiKey.trim()) {
             setApiKey(inputApiKey.trim());
+            setApiKeyError(false); // 에러 상태 리셋
             setIsModalOpen(false);
         }
     };
@@ -248,7 +252,7 @@ function CanvasPage(props) {
                 {isModalOpen && (
                     <ModalOverlay>
                         <ModalContent onClick={(e) => e.stopPropagation()}>
-                            <ModalTitle>Enter OpenAI API Key</ModalTitle>
+                            <ModalTitle>{apiKeyError ? 'Please enter a valid OpenAI API key.' : 'Enter OpenAI API Key'}</ModalTitle>
                             <ModalInput
                                 type="password"
                                 placeholder="sk-..."
@@ -262,7 +266,7 @@ function CanvasPage(props) {
                                 autoFocus
                             />
                                 <ModalButton 
-                                    primary 
+                                    $primary 
                                     onClick={handleSaveApiKey}
                                     disabled={!inputApiKey.trim()}
                                 >

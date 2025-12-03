@@ -98,7 +98,7 @@ function Card2S(props){
     const handleClick = (e) => {
         e.stopPropagation(); // 이벤트 버블링 방지
         onCardClick();
-        console.log('card is clicked')
+        // console.log('card is clicked')
         // setIsBack(!isBack);
     };
 
@@ -111,7 +111,7 @@ function Card2S(props){
 
     const handleDeleteCard = (e) => {
         e.stopPropagation();
-        console.log('delete card')
+        // console.log('delete card')
         deleteCard(cardId);
     };
 
